@@ -1,0 +1,17 @@
+{% extends 'artisans/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <div class="card-header" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+        <h2>⚠️ Delete Sale</h2>
+    </div>
+    <div class="card-body">
+        <p>Delete the sale of <strong>{{ sale.product_name }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">🗑 Delete</button>
+            <a href="{% url 'artisan_detail' artisan.pk %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

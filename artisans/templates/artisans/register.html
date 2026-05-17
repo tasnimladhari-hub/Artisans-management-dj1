@@ -1,0 +1,32 @@
+{% extends 'artisans/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <div class="card-header">
+        <h2>📝 Register</h2>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small style="color: #6c757d; font-size: 0.8rem;">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <small style="color: red;">{{ field.errors }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <button type="submit" class="btn btn-primary" style="width:100%">Register</button>
+        </form>
+        <p style="margin-top: 1rem; text-align: center;">
+            Already have an account? <a href="{% url 'login' %}" style="color:#6D3E73">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

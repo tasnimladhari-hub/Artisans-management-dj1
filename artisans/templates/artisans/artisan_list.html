@@ -1,0 +1,66 @@
+{% extends 'artisans/base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>👩‍🎨 Our Artisans</h1>
+    <a href="{% url 'artisan_create' %}" class="btn btn-primary">+ Add an artisan</a>
+</div>
+
+<form method="GET" class="search-bar">
+    <input type="text" name="search" class="search-input" placeholder="Search by name, email or specialty..." value="{{ search_query }}">
+    <button type="submit" class="btn btn-primary">🔍 Search</button>
+    {% if search_query %}
+        <a href="{% url 'artisan_list' %}" class="btn btn-secondary">✖ Clear</a>
+    {% endif %}
+</form>
+
+<div class="artisan-grid">
+    {% for artisan in artisans %}
+        <div class="artisan-card">
+            <div class="artisan-image">
+                {% if artisan.profile_image %}
+                    <img src="{{ artisan.profile_image.url }}" alt="{{ artisan.full_name }}" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                    👩‍🎨
+                {% endif %}
+            </div>
+            <div class="artisan-info">
+                <div class="artisan-name">{{ artisan.full_name }}</div>
+                <div>🎯 {{ artisan.specialty }}</div>
+                <div>📧 {{ artisan.email }}</div>
+                <div>📞 {{ artisan.phone }}</div>
+                <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                    <a href="{% url 'artisan_detail' artisan.pk %}" class="btn btn-primary btn-sm">View</a>
+                    <a href="{% url 'artisan_edit' artisan.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                    <a href="{% url 'artisan_delete' artisan.pk %}" class="btn btn-danger btn-sm">🗑</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div style="text-align: center; padding: 3rem;">
+            <p>No artisans found.</p>
+            <a href="{% url 'artisan_create' %}" class="btn btn-primary">Add your first artisan</a>
+        </div>
+    {% endfor %}
+</div>
+
+{% if artisans.has_other_pages %}
+    <div class="pagination">
+        {% if artisans.has_previous %}
+            <a href="?page={{ artisans.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">◀ Previous</a>
+        {% endif %}
+        
+        {% for num in artisans.paginator.page_range %}
+            {% if artisans.number == num %}
+                <span class="page-link" style="background:#6D3E73; color:white">{{ num }}</span>
+            {% else %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if artisans.has_next %}
+            <a href="?page={{ artisans.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">Next ▶</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

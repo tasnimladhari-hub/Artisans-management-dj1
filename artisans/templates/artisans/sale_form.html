@@ -1,0 +1,30 @@
+{% extends 'artisans/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <div class="card-header">
+        <h2>💰 Record a Sale</h2>
+        <p>For: {{ artisan.full_name }}</p>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            
+            <!-- 👇 ADD HERE (after the for loop, before the button) -->
+                        <!-- 👆 ADD HERE -->
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">💾 Save</button>
+                <a href="{% url 'artisan_detail' artisan.pk %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

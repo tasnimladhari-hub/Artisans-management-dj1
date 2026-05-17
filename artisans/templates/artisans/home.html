@@ -1,0 +1,156 @@
+{% extends 'artisans/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="welcome-section">
+    <h1><i class="fas fa-chart-line"></i> Dashboard</h1>
+    <p>Welcome {{ user.username }}! Manage your artisans, track sales, and analyze performance</p>
+    <div style="margin-top: 1rem;">
+        <a href="{% url 'artisan_create' %}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> New Artisan</a>
+        <a href="{% url 'artisan_list' %}" class="btn btn-secondary"><i class="fas fa-users"></i> View All</a>
+    </div>
+</div>
+
+<!-- Advanced Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <i class="fas fa-female" style="font-size: 2.5rem; color: var(--secondary);"></i>
+        <div class="stat-number">{{ total_artisans }}</div>
+        <div class="stat-label">Active Artisans</div>
+        <small style="color: green;"><i class="fas fa-arrow-up"></i> +12% this month</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-box" style="font-size: 2.5rem; color: var(--secondary);"></i>
+        <div class="stat-number">{{ total_materials }}</div>
+        <div class="stat-label">Materials in Stock</div>
+        <small><i class="fas fa-chart-line"></i> {{ total_materials_value|default:"0" }} TND value</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-chart-line" style="font-size: 2.5rem; color: var(--secondary);"></i>
+        <div class="stat-number">{{ total_sales_amount|default:"0" }} TND</div>
+        <div class="stat-label">Revenue</div>
+        <small style="color: green;"><i class="fas fa-trend-up"></i> +23%</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-hand-holding-heart" style="font-size: 2.5rem; color: var(--secondary);"></i>
+        <div class="stat-number">{{ avg_profit_per_artisan|default:"0" }} TND</div>
+        <div class="stat-label">Average Profit/Artisan</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <!-- Sales Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-bar"></i> Monthly Sales</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="salesChart" height="250"></canvas>
+        </div>
+    </div>
+    
+    <!-- Top Artisans -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-trophy"></i> Top 5 Artisans</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Artisan</th>
+                            <th>Specialty</th>
+                            <th>Sales</th>
+                            <th>Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for artisan in top_artisans %}
+                        <tr>
+                            <td><b>{{ artisan.full_name }}</b></td>
+                            <td>{{ artisan.specialty|truncatechars:20 }}</td>
+                            <td>{{ artisan.total_sales|floatformat:0 }} TND</td>
+                            <td>{{ artisan.profit|floatformat:0 }} TND</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align:center;">Add artisans to see stats</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Artisans List -->
+<div class="card">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3><i class="fas fa-users"></i> Recent Artisans</h3>
+        <a href="{% url 'artisan_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add</a>
+    </div>
+    <div class="card-body">
+        <div class="artisan-grid">
+            {% for artisan in recent_artisans %}
+                <div class="artisan-card">
+                    <div class="artisan-image">
+                        {% if artisan.profile_image %}
+                            <img src="{{ artisan.profile_image.url }}" alt="{{ artisan.full_name }}" style="width:100%;height:100%;object-fit:cover;">
+                        {% else %}
+                            <i class="fas fa-user-circle" style="font-size: 4rem;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="artisan-info">
+                        <div class="artisan-name">{{ artisan.full_name }}</div>
+                        <div><i class="fas fa-palette"></i> {{ artisan.specialty }}</div>
+                        <div><i class="fas fa-calendar"></i> {{ artisan.join_date|date:"d/m/Y" }}</div>
+                        <div><i class="fas fa-chart-simple"></i> Sales: {{ artisan.total_sales|floatformat:0 }} TND</div>
+                        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <a href="{% url 'artisan_detail' artisan.pk %}" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> Profile</a>
+                            <a href="{% url 'sale_create' artisan.pk %}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Sale</a>
+                            <a href="{% url 'material_create' artisan.pk %}" class="btn btn-secondary btn-sm"><i class="fas fa-box"></i> Material</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="text-align: center; padding: 2rem; grid-column: 1/-1;">
+                    <i class="fas fa-frown" style="font-size: 3rem; color: var(--gray-dark);"></i>
+                    <p>No artisans yet.</p>
+                    <a href="{% url 'artisan_create' %}" class="btn btn-primary">Add your first artisan</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Sales Chart
+const canvas = document.getElementById('salesChart');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Sales (TND)',
+                data: {{ chart_data|safe }},
+                backgroundColor: 'rgba(109, 62, 115, 0.7)',
+                borderColor: '#6D3E73',
+                borderWidth: 1,
+                borderRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' },
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

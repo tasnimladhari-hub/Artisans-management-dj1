@@ -1,0 +1,18 @@
+{% extends 'artisans/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <div class="card-header" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+        <h2>⚠️ Confirm Deletion</h2>
+    </div>
+    <div class="card-body">
+        <p>Are you sure you want to delete <strong>{{ artisan.full_name }}</strong>?</p>
+        <p style="color: red;">This action cannot be undone.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">🗑 Yes, delete</button>
+            <a href="{% url 'artisan_detail' artisan.pk %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
